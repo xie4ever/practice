@@ -1,23 +1,33 @@
 package cache
 
+import (
+	"errors"
+	"sync"
+)
+
 // LRUCache ...
 type LRUCache struct {
+	mux      sync.Mutex
 	size     int
 	capacity int
-	cacheMap map[int]*dLinkedNode
+	cacheMap map[interface{}]*dLinkedNode
 	head     *dLinkedNode
 	tail     *dLinkedNode
 }
 
 type dLinkedNode struct {
-	key   int
-	value int
+	key   interface{}
+	value interface{}
 	prev  *dLinkedNode
 	next  *dLinkedNode
 }
 
 // Constructor ...
-func Constructor(capacity int) LRUCache {
+func Constructor(capacity int) (*LRUCache, error) {
+	if capacity <= 0 {
+		return nil, errors.New("invalid capacity")
+	}
+
 	head := &dLinkedNode{
 		key:   0,
 		value: 0,
@@ -29,19 +39,22 @@ func Constructor(capacity int) LRUCache {
 	head.next = tail
 	tail.prev = head
 
-	return LRUCache{
+	return &LRUCache{
+		mux:      sync.Mutex{},
 		size:     0,
 		capacity: capacity,
-		cacheMap: map[int]*dLinkedNode{},
+		cacheMap: map[interface{}]*dLinkedNode{},
 		head:     head,
 		tail:     tail,
-	}
+	}, nil
 }
 
 // Get ...
-func (c *LRUCache) Get(key int) int {
+func (c *LRUCache) Get(key interface{}) interface{} {
+	c.mux.Lock()
+	defer c.mux.Unlock()
 	if node, ok := c.cacheMap[key]; !ok {
-		return -1
+		return nil
 	} else {
 		node.remove()
 		node.setNext(c.head.next)
@@ -51,7 +64,9 @@ func (c *LRUCache) Get(key int) int {
 }
 
 // Put ...
-func (c *LRUCache) Put(key int, value int) {
+func (c *LRUCache) Put(key interface{}, value interface{}) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
 	if node, ok := c.cacheMap[key]; !ok {
 		deleteNode := c.tail.prev
 		node := &dLinkedNode{

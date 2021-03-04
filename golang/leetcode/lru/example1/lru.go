@@ -40,27 +40,25 @@ func Constructor(capacity int) LRUCache {
 
 // Get ...
 func (c *LRUCache) Get(key int) int {
-	if _, ok := c.cacheMap[key]; !ok {
+	if node, ok := c.cacheMap[key]; !ok {
 		return -1
+	} else {
+		node.prev.next = node.next
+		node.next.prev = node.prev
+
+		node.prev = c.head
+		node.next = c.head.next
+
+		c.head.next.prev = node
+		c.head.next = node
+
+		return node.value
 	}
-
-	node := c.cacheMap[key]
-
-	node.prev.next = node.next
-	node.next.prev = node.prev
-
-	node.prev = c.head
-	node.next = c.head.next
-
-	c.head.next.prev = node
-	c.head.next = node
-
-	return node.value
 }
 
 // Put ...
 func (c *LRUCache) Put(key int, value int) {
-	if _, ok := c.cacheMap[key]; !ok {
+	if node, ok := c.cacheMap[key]; !ok {
 		deleteNode := c.tail.prev
 		node := &dLinkedNode{
 			key:   key,
@@ -81,17 +79,16 @@ func (c *LRUCache) Put(key int, value int) {
 			c.tail.prev = c.tail.prev.prev
 		}
 		return
+	} else {
+		node.value = value
+
+		node.prev.next = node.next
+		node.next.prev = node.prev
+
+		node.prev = c.head
+		node.next = c.head.next
+
+		c.head.next.prev = node
+		c.head.next = node
 	}
-
-	node := c.cacheMap[key]
-	node.value = value
-
-	node.prev.next = node.next
-	node.next.prev = node.prev
-
-	node.prev = c.head
-	node.next = c.head.next
-
-	c.head.next.prev = node
-	c.head.next = node
 }
