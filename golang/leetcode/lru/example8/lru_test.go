@@ -100,3 +100,16 @@ func Test6(t *testing.T) {
 		return true
 	})
 }
+
+// Test7 ...
+func Test7(t *testing.T) {
+	var waitGroup sync.WaitGroup
+	c, _ := Constructor(10, time.Second)
+	testPut(&waitGroup, c)
+	waitGroup.Wait()
+	time.Sleep(10 * time.Second)
+	c.cacheMap.Range(func(k interface{}, v interface{}) bool {
+		fmt.Println(fmt.Sprintf("k=%v, v=%v", k, c.Get(k)))
+		return true
+	})
+}

@@ -42,7 +42,7 @@ func Constructor(capacity int, ttl time.Duration) (*LRUCache, error) {
 	head.next = tail
 	tail.prev = head
 
-	return &LRUCache{
+	c := &LRUCache{
 		mux:      sync.Mutex{},
 		size:     0,
 		capacity: capacity,
@@ -50,7 +50,43 @@ func Constructor(capacity int, ttl time.Duration) (*LRUCache, error) {
 		head:     head,
 		tail:     tail,
 		ttl:      ttl,
-	}, nil
+	}
+	go clear(c)
+	return c, nil
+}
+
+func clear(c *LRUCache) {
+	for {
+		c.mux.Lock()
+
+		now := time.Now()
+
+		var (
+			firstDeleteNode *dLinkedNode
+			deleteNodeList  []*dLinkedNode
+		)
+		for start := c.head.next; start.next != nil; start = start.next {
+			if start.expiredAt.Before(now) {
+				if firstDeleteNode == nil {
+					firstDeleteNode = start
+				}
+				deleteNodeList = append(deleteNodeList, start)
+			}
+		}
+
+		if firstDeleteNode != nil {
+			firstDeleteNode.prev.setNext(c.tail)
+		}
+
+		for _, deleteNode := range deleteNodeList {
+			deleteNode.prev = nil
+			deleteNode.next = nil
+			c.cacheMap.Delete(deleteNode.key)
+		}
+
+		c.mux.Unlock()
+		time.Sleep(1 * time.Second)
+	}
 }
 
 // Get ...

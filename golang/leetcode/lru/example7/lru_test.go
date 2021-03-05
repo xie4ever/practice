@@ -100,3 +100,51 @@ func Test6(t *testing.T) {
 		return true
 	})
 }
+
+// Test7 ...
+func Test7(t *testing.T) {
+	var waitGroup sync.WaitGroup
+	c, _ := Constructor(10, time.Second)
+	testPut(&waitGroup, c)
+	waitGroup.Wait()
+
+	go func() {
+		for {
+			c.mux.Lock()
+
+			now := time.Now()
+
+			var (
+				firstDeleteNode *dLinkedNode
+				deleteNodeList  []*dLinkedNode
+			)
+			for start := c.head.next; start.next != nil; start = start.next {
+				if start.expiredAt.Before(now) {
+					if firstDeleteNode == nil {
+						firstDeleteNode = start
+					}
+					deleteNodeList = append(deleteNodeList, start)
+				}
+			}
+
+			if firstDeleteNode != nil {
+				firstDeleteNode.prev.setNext(c.tail)
+			}
+
+			for _, deleteNode := range deleteNodeList {
+				deleteNode.prev = nil
+				deleteNode.next = nil
+				c.cacheMap.Delete(deleteNode.key)
+			}
+
+			c.mux.Unlock()
+			time.Sleep(1 * time.Second)
+		}
+	}()
+
+	time.Sleep(10 * time.Second)
+	c.cacheMap.Range(func(k interface{}, v interface{}) bool {
+		fmt.Println(fmt.Sprintf("k=%v, v=%v", k, c.Get(k)))
+		return true
+	})
+}
