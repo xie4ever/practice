@@ -76,7 +76,7 @@ func Test4(t *testing.T) {
 // Test5 ...
 func Test5(t *testing.T) {
 	var waitGroup sync.WaitGroup
-	c, _ := Constructor(10)
+	c, _ := Constructor(10, time.Second)
 	for i := 0; i < 100; i++ {
 		testPut(&waitGroup, c)
 	}
