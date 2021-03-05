@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+// from https://www.wolai.com/mayj/rLGcCeJpM6Jb2JvSfpTru4
+
 const (
 	objCount  = 1 * 10000 // 对象个数
 	testCount = 10        // 次数
