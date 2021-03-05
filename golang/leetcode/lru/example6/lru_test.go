@@ -76,13 +76,27 @@ func Test4(t *testing.T) {
 // Test5 ...
 func Test5(t *testing.T) {
 	var waitGroup sync.WaitGroup
+	c, _ := Constructor(10)
+	for i := 0; i < 100; i++ {
+		testPut(&waitGroup, c)
+	}
+	waitGroup.Wait()
+	time.Sleep(2 * time.Second)
+	c.cacheMap.Range(func(k interface{}, v interface{}) bool {
+		fmt.Println(fmt.Sprintf("k=%v, v=%v", k, v))
+		return true
+	})
+}
+
+// Test6 ...
+func Test6(t *testing.T) {
+	var waitGroup sync.WaitGroup
 	c, _ := Constructor(10, time.Second)
 	testPut(&waitGroup, c)
 	waitGroup.Wait()
 	time.Sleep(2 * time.Second)
 	c.cacheMap.Range(func(k interface{}, v interface{}) bool {
-		v = c.Get(k)
-		fmt.Println(fmt.Sprintf("k=%v, v=%v", k, v))
+		fmt.Println(fmt.Sprintf("k=%v, v=%v", k, c.Get(k)))
 		return true
 	})
 }
