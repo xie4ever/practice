@@ -1,23 +1,36 @@
 package cache
 
+import (
+	"errors"
+	"sync"
+	"time"
+)
+
 // LRUCache ...
 type LRUCache struct {
+	mux      sync.Mutex
 	size     int
 	capacity int
-	cacheMap map[int]*dLinkedNode
+	cacheMap sync.Map
 	head     *dLinkedNode
 	tail     *dLinkedNode
+	ttl      time.Duration
 }
 
 type dLinkedNode struct {
-	key   int
-	value int
-	prev  *dLinkedNode
-	next  *dLinkedNode
+	key       interface{}
+	value     interface{}
+	prev      *dLinkedNode
+	next      *dLinkedNode
+	expiredAt time.Time
 }
 
 // Constructor ...
-func Constructor(capacity int) LRUCache {
+func Constructor(capacity int, ttl time.Duration) (*LRUCache, error) {
+	if capacity <= 0 {
+		return nil, errors.New("invalid capacity")
+	}
+
 	head := &dLinkedNode{
 		key:   0,
 		value: 0,
@@ -29,20 +42,32 @@ func Constructor(capacity int) LRUCache {
 	head.next = tail
 	tail.prev = head
 
-	return LRUCache{
+	c := &LRUCache{
+		mux:      sync.Mutex{},
 		size:     0,
 		capacity: capacity,
-		cacheMap: map[int]*dLinkedNode{},
+		cacheMap: sync.Map{},
 		head:     head,
 		tail:     tail,
+		ttl:      ttl,
 	}
+
+	return c, nil
 }
 
 // Get ...
-func (c *LRUCache) Get(key int) int {
-	if node, ok := c.cacheMap[key]; !ok {
-		return -1
+func (c *LRUCache) Get(key interface{}) interface{} {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	if v, ok := c.cacheMap.Load(key); !ok {
+		return nil
 	} else {
+		node := v.(*dLinkedNode)
+		if node.expiredAt.Before(time.Now()) {
+			node.remove()
+			return nil
+		}
+
 		node.remove()
 		node.setNext(c.head.next)
 		node.setPrev(c.head)
@@ -51,14 +76,17 @@ func (c *LRUCache) Get(key int) int {
 }
 
 // Put ...
-func (c *LRUCache) Put(key int, value int) {
-	if node, ok := c.cacheMap[key]; !ok {
+func (c *LRUCache) Put(key interface{}, value interface{}) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	if v, ok := c.cacheMap.Load(key); !ok {
 		deleteNode := c.tail.prev
 		node := &dLinkedNode{
-			key:   key,
-			value: value,
+			key:       key,
+			value:     value,
+			expiredAt: time.Now().Add(c.ttl),
 		}
-		c.cacheMap[key] = node
+		c.cacheMap.Store(key, node)
 
 		node.setNext(c.head.next)
 		node.setPrev(c.head)
@@ -66,12 +94,14 @@ func (c *LRUCache) Put(key int, value int) {
 		c.size++
 		if c.size > c.capacity {
 			c.size--
-			delete(c.cacheMap, deleteNode.key)
+			c.cacheMap.Delete(deleteNode.key)
 			deleteNode.remove()
 		}
 		return
 	} else {
+		node := v.(*dLinkedNode)
 		node.value = value
+		node.expiredAt = time.Now().Add(c.ttl)
 
 		node.remove()
 		node.setNext(c.head.next)

@@ -94,10 +94,12 @@ func (c *LRUCache) Put(key interface{}, value interface{}) {
 	}
 }
 
-// 移除节点，连接前后节点
+// 移除节点，连接前后节点，前后指针设为nil
 func (n *dLinkedNode) remove() {
 	n.prev.next = n.next
 	n.next.prev = n.prev
+	n.prev = nil
+	n.next = nil
 }
 
 // 绑定前节点
