@@ -29,8 +29,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	file.WriteString("|address|content|\n")
-	file.WriteString("|----|----|\n")
+	if _, err := file.WriteString("|address|content|\n"); err != nil {
+		log.Fatal(err)
+	}
+	if _, err := file.WriteString("|----|----|\n"); err != nil {
+		log.Fatal(err)
+	}
 
 	var monthList []string
 	monthMap := make(map[string][]string, 8)
@@ -45,6 +49,7 @@ func main() {
 		if !ok {
 			continue
 		}
+
 		for _, id := range idList {
 			url := fmt.Sprintf("http://mysql.taobao.org/monthly/%s/%s/", month, id)
 			body, err := download(url)
@@ -63,7 +68,9 @@ func main() {
 			for _, content := range contentList {
 				text := fmt.Sprintf("%s\n", content)
 				fmt.Print(text)
-				file.WriteString(text)
+				if _, err := file.WriteString(text); err != nil {
+					log.Fatal(err)
+				}
 			}
 
 			time.Sleep(2 * time.Second)
