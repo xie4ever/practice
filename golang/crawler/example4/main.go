@@ -28,6 +28,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer file.Close()
 	file.WriteString("|address|content|\n")
 	file.WriteString("|----|----|\n")
 
