@@ -55,6 +55,17 @@ func (b *bitMap) contain(num int) bool {
 	return !(b.bits[byteIndex]&(1<<bitIndex) == 0)
 }
 
+func (b *bitMap) list() []int {
+	var dataList []int
+	size := len(b.bits) * 8
+	for i := 0; i < size; i++ {
+		if b.contain(i) {
+			dataList = append(dataList, i)
+		}
+	}
+	return dataList
+}
+
 // TestBitMap ...
 func TestBitMap(t *testing.T) {
 	b := newBitMap(100)
@@ -62,4 +73,16 @@ func TestBitMap(t *testing.T) {
 	fmt.Println(b.contain(3))
 	b.clear(3)
 	fmt.Println(b.contain(3))
+}
+
+// TestList ...
+func TestList(t *testing.T) {
+	b := newBitMap(100)
+	b.add(3)
+	b.add(5)
+	b.add(12)
+	b.add(50)
+	b.add(98)
+	b.add(99)
+	fmt.Println(b.list())
 }
