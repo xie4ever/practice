@@ -48,3 +48,47 @@ func quickSort(arr []int, low, high int) {
 	quickSort(arr, low, i-1)
 	quickSort(arr, i+1, high)
 }
+
+// TestQuickSort2 ...
+func TestQuickSort2(t *testing.T) {
+	var arr = []int{5, 4, 8, 3, 2, 9, 1, 7, 6}
+	quickSort2(arr, 0, len(arr)-1)
+	for _, a := range arr {
+		fmt.Println(a)
+	}
+}
+
+func quickSort2(arr []int, low, high int) {
+	if len(arr) <= 0 {
+		return
+	}
+	if low >= high {
+		return
+	}
+
+	var (
+		i     = low
+		j     = high
+		value = arr[i]
+	)
+
+	for i < j {
+		for i < j && arr[j] >= value {
+			j--
+		}
+		if i < j {
+			arr[i] = arr[j]
+			i++
+		}
+		for i < j && arr[i] < value {
+			i++
+		}
+		if i < j {
+			arr[j] = arr[i]
+			j--
+		}
+		arr[i] = value
+		quickSort2(arr, low, i-1)
+		quickSort2(arr, i+1, high)
+	}
+}
