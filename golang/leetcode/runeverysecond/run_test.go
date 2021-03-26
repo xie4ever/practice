@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"testing"
 	"time"
 )
 
-func main() {
+// Test ...
+func Test(t *testing.T) {
 	go func() {
 		// 1 在这里需要你写算法
 		// 2 要求每秒钟调用一次proc函数
@@ -19,7 +21,7 @@ func main() {
 			ticker := time.NewTicker(time.Second)
 			select {
 			case <-ticker.C:
-				func() {
+				func(flag bool) {
 					defer func() {
 						if err := recover(); err != nil {
 							fmt.Println(err)
@@ -34,7 +36,7 @@ func main() {
 					i++
 					fmt.Println(i)
 					proc()
-				}()
+				}(flag)
 			}
 		}
 	}()
