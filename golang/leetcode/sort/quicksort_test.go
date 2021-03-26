@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-// Test ...
-func Test(t *testing.T) {
+// TestQuickSort ...
+func TestQuickSort(t *testing.T) {
 	var arr = []int{5, 4, 8, 3, 2, 9, 1, 7, 6}
 	quickSort(arr, 0, len(arr)-1)
 	for _, a := range arr {
