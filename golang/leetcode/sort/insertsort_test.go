@@ -51,15 +51,15 @@ func insertSort2(arr []int) {
 			continue
 		} else {
 			tmp := arr[i]
-			idx := i
-			for ; idx > 0; idx-- {
-				if arr[idx-1] > tmp {
-					arr[idx] = arr[idx-1]
+			j := i
+			for ; j > 0; j-- {
+				if arr[j-1] > tmp {
+					arr[j] = arr[j-1]
 				} else {
 					break
 				}
 			}
-			arr[idx] = tmp
+			arr[j] = tmp
 		}
 	}
 }

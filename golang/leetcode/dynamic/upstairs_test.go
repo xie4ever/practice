@@ -57,7 +57,7 @@ func upstairs3(step int) int {
 		b   = 2
 		tmp = 0
 	)
-	for i := 3; i < step; i++ {
+	for i := 3; i <= step; i++ {
 		tmp = a + b
 		a = b
 		b = tmp

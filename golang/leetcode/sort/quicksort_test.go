@@ -67,28 +67,27 @@ func quickSort2(arr []int, low, high int) {
 	}
 
 	var (
-		i     = low
-		j     = high
-		value = arr[i]
+		i   = low
+		j   = high
+		tmp = arr[i]
 	)
-
 	for i < j {
-		for i < j && arr[j] >= value {
+		for i < j && arr[j] >= tmp {
 			j--
 		}
 		if i < j {
 			arr[i] = arr[j]
 			i++
 		}
-		for i < j && arr[i] < value {
+		for i < j && arr[i] < tmp {
 			i++
 		}
 		if i < j {
 			arr[j] = arr[i]
 			j--
 		}
-		arr[i] = value
-		quickSort2(arr, low, i-1)
-		quickSort2(arr, i+1, high)
 	}
+	arr[i] = tmp
+	quickSort2(arr, low, i-1)
+	quickSort2(arr, i+1, high)
 }
