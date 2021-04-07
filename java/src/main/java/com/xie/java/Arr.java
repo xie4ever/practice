@@ -1,4 +1,4 @@
-package com.xie.base;
+package com.xie.java;
 
 /**
  * @author xie4ever
