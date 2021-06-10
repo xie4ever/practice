@@ -73,8 +73,7 @@ func cal3(ctx context.Context, second int) {
 func TestCal3(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	for i := 0; i < 10; i++ {
-		go cal3(ctx, i)
+	for i := 0; i < 10; i++ {go cal3(ctx, i)
 	}
 
 	time.Sleep(time.Duration(5) * time.Second)
