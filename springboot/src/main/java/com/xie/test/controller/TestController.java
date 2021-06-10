@@ -181,7 +181,7 @@ public class TestController {
                 System.out.println("fail");
             }
         } finally {
-            redissonClient.unlock();
+            redissonClient.
         }
     }
 }
